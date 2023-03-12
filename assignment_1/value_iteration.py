@@ -4,11 +4,12 @@ from config import *
 from maze import Maze
 from csv_generator import CSV
 
+# define a constant maximum error value
+max_error = 68
+
 
 def value_iteration(maze: Maze):
-    # define max_error
-    # Chose a constant value of 68 for this assignment
-    max_error = int(input('Choose a value for the maximum error: '))
+    """Valie Iteration Algorithm Implementation"""
 
     threshold = max_error * ((1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR)
     max_utility_change = 0
@@ -50,14 +51,14 @@ def calculate_utility(curr_cell: Cells, maze: Maze):
     utilities = [0.0] * 4
 
     # Calculating the utilities of each direction policy
-    for directions in range(Coordinates.TOTAL_DIRECTIONS):
+    for direction in range(Coordinates.TOTAL_DIRECTIONS):
         neighbours = maze.get_neighbours_of_cell_direction(
-            curr_cell, directions)
+            curr_cell, direction)
         up = P_UP * neighbours[0].get_utility()
         left = P_LEFT * neighbours[1].get_utility()
         right = P_RIGHT * neighbours[2].get_utility()
 
-        utilities[directions] = up + left + right
+        utilities[direction] = up + left + right
 
     # Get the max utility out of the 4 directions
     max_utility = 0

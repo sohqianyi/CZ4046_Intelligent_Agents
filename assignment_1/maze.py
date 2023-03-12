@@ -22,7 +22,7 @@ class Maze:
         col, row = coordinate.get_col(), coordinate.get_row()
         return self.cells[col][row]
 
-    def get_neighbours_of_cell_current_policy(self, curr_cell: Cells):
+    def get_neighbours_of_cell_current_policy(self, curr_cell: Cells) -> List[Cells]:
 
         curr_policy = curr_cell.get_policy()
         curr_direction = curr_policy.get_direction()
