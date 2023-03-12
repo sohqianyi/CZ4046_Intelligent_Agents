@@ -16,8 +16,8 @@ class Policy:
         elif direction == 3:
             self.symbol = ">"
 
-    def get_symbol(self):
+    def get_symbol(self) -> str:
         return self.symbol
 
-    def get_direction(self):
+    def get_direction(self) -> int:
         return self.direction

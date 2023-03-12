@@ -4,21 +4,23 @@ from config import *
 from maze import Maze
 from csv_generator import CSV
 
-max_error = 70
-
 
 def value_iteration(maze: Maze):
+    # define max_error
+    # Chose a constant value of 68 for this assignment
+    max_error = int(input('Choose a value for the maximum error: '))
+
     threshold = max_error * ((1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR)
     max_utility_change = 0
     i = 1
-    csv_file = CSV("ValueIteration", maze)
+    csv_file = CSV("value_iteration", maze)
 
-    print("Original:")
-    maze.print()
+    print("Original Maze:")
+    maze.print_maze()
     csv_file.add_utilities(maze)
 
-    while max_utility_change >= threshold:
-        print(f"Iteration: {i}")
+    while True:
+        print(f"No. of Iterations: {i}")
         max_utility_change = 0
 
         # Runs for each State in the Maze
@@ -35,11 +37,13 @@ def value_iteration(maze: Maze):
                     max_utility_change = utility_change
 
         i += 1
-        print(f"Maximum Utility Change: {max_utility_change:.3f}")
-        maze.print()
+        print(f"Max Utility Change: {max_utility_change:.3f}")
+        maze.print_maze()
         csv_file.add_utilities(maze)
 
-    csv_file.create_csv()
+        if max_utility_change < threshold:
+            csv_file.write_csv()
+            break
 
 
 def calculate_utility(curr_cell: Cells, maze: Maze):
@@ -72,5 +76,5 @@ def calculate_utility(curr_cell: Cells, maze: Maze):
 
 
 if __name__ == '__main__':
-    maze = Maze("bigger_maze")
+    maze = Maze("original")
     value_iteration(maze)

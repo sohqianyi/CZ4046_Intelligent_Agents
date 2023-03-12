@@ -27,26 +27,27 @@ class CSV:
                     self.headings.append(f'"Brown: ({c}, {r})"')
 
     def add_utilities(self, maze: Maze) -> None:
-        incoming = []
+        utility = []
 
         for c in range(COLS):
             for r in range(ROWS):
-                incoming.append(maze.get_cell(Coordinates(c, r)).get_utility())
+                utility.append(maze.get_cell(Coordinates(c, r)).get_utility())
 
-        self.data.append(incoming)
+        self.data.append(utility)
 
-    def create_csv(self) -> None:
-        CSV.write(self.file + "_bigger_maze", self.headings, self.data)
-
-    @staticmethod
-    def write(file: str, headings: List[str], data: List[List[float]]) -> None:
+    def write_csv(self) -> None:
         try:
-            filePath = os.path.abspath('')
-            with open(os.path.join(filePath, 'csv', file + '.csv'), mode='w', newline='') as csv_file:
+            path = os.path.abspath('')
+            results_path = os.path.join(
+                path, 'assignment_1', 'results', self.file + '_original.csv')
+
+            with open(results_path, 'w', newline='') as csv_file:
                 writer = csv.writer(csv_file, delimiter=',')
-                writer.writerow(headings)
-                for iteration in data:
+                writer.writerow(self.headings)
+                for iteration in self.data:
                     writer.writerow(iteration)
+
+            print('CSV generated at:', results_path)
 
         except IOError as e:
             print("I/O error occurred: ", e)

@@ -3,6 +3,7 @@ from policy import Policy
 from config import *
 
 import enum
+from typing import Tuple
 
 
 class Cells(Coordinates):
@@ -14,10 +15,11 @@ class Cells(Coordinates):
         WALL = enum.auto()
         GREEN = enum.auto()
 
-    def __init__(self, coordinate: Coordinates):
-        super().__init__(coordinate.get_col(), coordinate.get_row())
+    def __init__(self, coordinate: Tuple[int, int]):
+        coord = Coordinates(*coordinate)
+        super().__init__(coord.get_col(), coord.get_row())
         self.utility = 0
-        self.policy = Policy.UP
+        self.policy = Policy(Policy.UP)
         self.cell_type = Cells.Type.WHITE
 
     def get_utility(self):
@@ -26,18 +28,18 @@ class Cells(Coordinates):
     def set_utility(self, utility):
         self.utility = utility
 
-    def get_policy(self) -> Policy:  # CHECKME
+    def get_policy(self) -> Policy:
         return self.policy
 
     def set_policy(self, val):
         if val == 0:
-            self.policy = Policy.UP
+            self.policy = Policy(Policy.UP)
         elif val == 1:
-            self.policy = Policy.DOWN
+            self.policy = Policy(Policy.DOWN)
         elif val == 2:
-            self.policy = Policy.LEFT
+            self.policy = Policy(Policy.LEFT)
         elif val == 3:
-            self.policy = Policy.RIGHT
+            self.policy = Policy(Policy.RIGHT)
 
     def get_cell_type(self) -> Type:
         return self.cell_type

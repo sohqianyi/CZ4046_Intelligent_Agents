@@ -18,9 +18,8 @@ class Maze:
         if file is not None:
             self.import_maze(file)
 
-    def get_cell(self, coordinate: Coordinates) -> Cells:  # CHECKME (remove coordinates?)
+    def get_cell(self, coordinate: Coordinates) -> Cells:
         col, row = coordinate.get_col(), coordinate.get_row()
-        # col, row = coordinate
         return self.cells[col][row]
 
     def get_neighbours_of_cell_current_policy(self, curr_cell: Cells):
@@ -54,7 +53,7 @@ class Maze:
 
         return neighbour_cells
 
-    def print(self):
+    def print_maze(self):
         for r in range(self.row):
             for c in range(self.col):
                 curr_cell = self.cells[c][r]
@@ -65,7 +64,7 @@ class Maze:
                     policy = curr_cell.get_policy().get_symbol()
 
                     print(f"| {cell_type} {utility:>7.3f} {policy}",
-                          end="")  # CHECKME
+                          end="")
                 else:
                     print("|" + " " * 21, end="")
 
@@ -73,7 +72,7 @@ class Maze:
 
         print()
 
-    def import_maze(self, file):  # CHECKME
+    def import_maze(self, file):
         try:
             file_path = os.path.join(os.path.dirname(
                 __file__), "maze", file + ".txt")
@@ -81,10 +80,9 @@ class Maze:
             with open(file_path, "r") as f:
                 for r in range(self.row):
                     row = f.readline().strip()
-
+                    row = row.replace(" ", "")  # remove all white spaces
                     for c in range(self.col):
-                        cell_type = Cells.Type(row[c])
+                        cell_type = row[c]
                         self.cells[c][r].set_cell_type(cell_type)
-
         except Exception as e:
             print(e)
