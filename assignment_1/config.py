@@ -1,6 +1,6 @@
 # GRID
-ROWS = 6
-COLS = 6
+ROWS = 7
+COLS = 7
 
 # REWARDS
 GREEN_REWARD = 1

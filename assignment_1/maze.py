@@ -16,7 +16,7 @@ class Maze:
                       for i in range(self.col)]
 
         if file is not None:
-            self.import_maze(file)
+            self.load_maze(file)
 
     def get_cell(self, coordinate: Coordinates) -> Cells:
         col, row = coordinate.get_col(), coordinate.get_row()
@@ -53,7 +53,9 @@ class Maze:
 
         return neighbour_cells
 
-    def print_maze(self):
+    def print_utility(self):
+        print("Utilities of all States")
+
         for r in range(self.row):
             for c in range(self.col):
                 curr_cell = self.cells[c][r]
@@ -61,18 +63,39 @@ class Maze:
                 if curr_cell.get_cell_type() != Cells.Type.WALL:
                     utility = curr_cell.get_utility()
                     cell_type = curr_cell.get_cell_type()
-                    policy = curr_cell.get_policy().get_symbol()
 
-                    print(f"| {cell_type} {utility:>7.3f} {policy}",
+                    print(f"| {str(cell_type)[5:]} {utility:>7.3f} ",
                           end="")
+
                 else:
-                    print("|" + " " * 21, end="")
+                    print("|" + " WALL    0.000 ", end="")
 
             print("|")
 
         print()
 
-    def import_maze(self, file):
+    def print_policy(self):
+        print("Plot of Optimal Policy")
+
+        for r in range(self.row):
+            for c in range(self.col):
+                curr_cell = self.cells[c][r]
+
+                if curr_cell.get_cell_type() != Cells.Type.WALL:
+                    cell_type = curr_cell.get_cell_type()
+                    symbol = curr_cell.get_policy().get_symbol()
+
+                    print(f"| {str(cell_type)[5:]} {symbol} ",
+                          end="")
+
+                else:
+                    print("|" + " WALL  - ", end="")
+
+            print("|")
+
+        print()
+
+    def load_maze(self, file):
         try:
             file_path = os.path.join(os.path.dirname(
                 __file__), "maze", file + ".txt")
