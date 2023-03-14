@@ -12,7 +12,9 @@ Python 3.9.12
 
 ### Running the Algorithms
 
-First, navigate to the assignment_1 folder
+First, search for `# CHANGEME` in the project and change the variables accordingly.
+
+Next, navigate to the assignment_1 folder
 
 `cd assignment_1`
 

@@ -8,7 +8,6 @@ from typing import Tuple
 
 class Cells(Coordinates):
 
-    # CHECKME
     class Type(enum.Enum):
         WHITE = enum.auto()
         BROWN = enum.auto()

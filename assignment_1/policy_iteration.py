@@ -127,5 +127,7 @@ def policy_improvement(curr_cell: Cells, maze: Maze):
 
 
 if __name__ == '__main__':
-    maze = Maze("complex")
+    # CHANGEME: Change maze here
+    # Choose a template from the maze folder
+    maze = Maze("original")
     policy_iteration(maze)

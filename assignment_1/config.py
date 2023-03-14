@@ -1,6 +1,7 @@
 # GRID
-ROWS = 7
-COLS = 7
+# CHANGEME: Change rows and columns according to grid size
+ROWS = 6
+COLS = 6
 
 # REWARDS
 GREEN_REWARD = 1
