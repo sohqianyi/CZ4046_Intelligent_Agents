@@ -39,7 +39,7 @@ class CSV:
         try:
             path = os.path.abspath('')
             results_path = os.path.join(
-                path, 'assignment_1', 'results', self.file + '_complex.csv')
+                path, 'results', self.file + '_complex.csv')
 
             with open(results_path, 'w', newline='') as csv_file:
                 writer = csv.writer(csv_file, delimiter=',')
