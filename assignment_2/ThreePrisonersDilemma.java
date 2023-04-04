@@ -165,8 +165,7 @@ public class ThreePrisonersDilemma {
 
 	class ForgivingT4TPlayer extends Player {
 		// Cooperates then plays T4T
-		// if opponent defects, cooperates for a threshold of 5 before switching to
-		// defect
+		// if opponent defects, cooperates for a threshold before switching to defect
 		int forgivenessThreshold = 2;
 
 		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
@@ -279,62 +278,136 @@ public class ThreePrisonersDilemma {
 		}
 	}
 
-	/* My strategy */
+	/* Different Combinations of Strategies */
 
+	/**
+	 * A player that combines the GrimTrigger and Gradual strategies.
+	 */
+	class GrimTriggerWithGradualPlayer extends Player {
+		// This strategy combines elements of GrimTriggerPlayer and GradualPlayer.
+		// It cooperates until the opponent defects, at which point it enters a
+		// "grim trigger" mode and defects for a certain number of rounds before
+		// reverting back to cooperation.
+
+		private boolean defectMode = false; // Tracks whether the strategy is in defect mode
+		private int roundsSinceLastDefect = -1; // Counts the number of rounds since the last defect
+		private int threshold = 3; // The number of rounds to defect before reverting back to cooperation
+
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
+			if (n == 0) {
+				return 0; // Cooperate on first move
+			}
+
+			// Check if opponent defected last move
+			if (oppHistory1[oppHistory1.length - 1] == 1) {
+				// If the opponent defected, enter defect mode and reset the rounds counter
+				defectMode = true;
+				roundsSinceLastDefect = 0;
+			}
+
+			// Play according to strategy
+			if (defectMode) {
+				if (roundsSinceLastDefect >= threshold) {
+					// If enough rounds have passed since the last defect, exit defect mode
+					defectMode = false;
+				} else {
+					// Otherwise, increment the rounds counter and continue to defect
+					roundsSinceLastDefect++;
+				}
+				return 1; // Defect if in defect mode
+			} else {
+				return 0; // Cooperate if not in defect mode
+			}
+		}
+	}
+
+	/**
+	 * A player that combines the GrimTrigger and ForgivingT4T strategies.
+	 * * Chosen as Soh_QianYi_Player
+	 */
 	class GrimTriggerWithForgivenessPlayer extends Player {
 		// Cooperates first, plays T4T as long as opponent cooperates
 		// but defects if other player defects
 		// until opponent cooperates twice in a row
 
-		boolean triggered = false; // whether the player has been triggered
-		int roundsSinceDefection = 0; // number of rounds since the opponent last defected
+		boolean triggered = false; // whether the player has been triggered (GrimTrigger)
+		int roundsSinceDefection = 0; // number of rounds since the opponent last defected (ForgivingT4T)
 
 		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
 			if (n == 0)
 				return 0; // cooperate by default
 			if (triggered)
-				return 1; // always defect if triggered
+				return 1; // always defect if triggered (GrimTrigger)
 			if (oppHistory1[n - 1] == 0 && oppHistory2[n - 1] == 0)
-				return 0; // cooperate if both opponents cooperated last round
+				return 0; // cooperate if both opponents cooperated last round (ForgivingT4T)
 			else if (oppHistory1[n - 1] == 1 || oppHistory2[n - 1] == 1) {
 				if (roundsSinceDefection >= 2) {
 					triggered = true;
-					return 1; // always defect if triggered
+					return 1; // always defect if triggered (GrimTrigger)
 				} else {
 					roundsSinceDefection++;
-					return Math.min(oppHistory1[n - 1], oppHistory2[n - 1]); // tit-for-tat
+					return Math.min(oppHistory1[n - 1], oppHistory2[n - 1]); // tit-for-tat (ForgivingT4T)
 				}
 			} else {
 				roundsSinceDefection = 0;
-				return 0; // cooperate if both opponents defected last round
+				return 0; // cooperate if both opponents defected last round (ForgivingT4T)
 			}
 		}
 	}
 
-	class Soh_QianYi_Player extends Player {
-		GrimTriggerWithForgivenessPlayer gtPlayer = new GrimTriggerWithForgivenessPlayer();
-		ForgivingT4TPlayer ftPlayer = new ForgivingT4TPlayer();
-		GradualPlayer gPlayer = new GradualPlayer();
+	/**
+	 * A player that combines the Gradual and ForgivingT4T strategies.
+	 */
+	class GradualWithForgivenessPlayer extends Player {
+		// Cooperates first, plays T4T as long as opponent cooperates
+		// but defects if other player defects
+		// until opponent cooperates twice in a row
+		// Also implements Forgiving T4T, by playing cooperatively if the
+		// opponent has defected fewer than 'forgivenessThreshold' times in the past
+		int forgivenessThreshold = 2; // Threshold for forgiveness
+		int cooperateCount = 0; // Count of times opponent cooperated in a row
+		int lastAction = 0; // Last action played
+		int n = 0; // Round number
 
 		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
-			if (n < 2) {
-				// First two rounds: Cooperate
-				return 0;
+			int oppLastAction = (oppHistory1.length == 0) ? 0 : oppHistory1[oppHistory1.length - 1];
+
+			// Forgiving T4T: plays cooperatively if the opponent has defected fewer than
+			// 'forgivenessThreshold' times in the past
+			if (oppHistory1.length < forgivenessThreshold
+					|| oppHistory1[oppHistory1.length - forgivenessThreshold] == 0) {
+				lastAction = 0; // Cooperate
 			} else {
-				// Use a weighted average of the three strategies
-				float gtWeight = 0.4f;
-				float ftWeight = 0.4f;
-				float gWeight = 0.2f;
-				int gtAction = gtPlayer.selectAction(n, myHistory, oppHistory1, oppHistory2);
-				int ftAction = ftPlayer.selectAction(n, myHistory, oppHistory1, oppHistory2);
-				int gAction = gPlayer.selectAction(n, myHistory, oppHistory1, oppHistory2);
-				float weightedSum = (gtWeight * gtAction) + (ftWeight * ftAction) + (gWeight * gAction);
-				return Math.round(weightedSum);
+				lastAction = oppLastAction; // Play the same as the opponent's last action
+			}
+
+			// Gradual: cooperates first, plays T4T as long as opponent cooperates but
+			// defects if other player defects
+			// until opponent cooperates twice in a row
+			if (oppLastAction == 1) { // Opponent cooperated
+				cooperateCount = 0;
+				return 1; // Cooperate
+			} else if (cooperateCount >= 2) { // Opponent defected twice in a row
+				cooperateCount = 0;
+				return 0; // Defect
+			} else { // Opponent defected but less than twice in a row
+				cooperateCount++;
+				return 1; // Cooperate
 			}
 		}
 	}
 
-	class GrimGradualWithForgiveness extends Player {
+	/**
+	 * A player that combines the GrimTrigger, Gradual and ForgivingT4T strategies.
+	 */
+	class GrimTriggerGradualWithForgivenessPlayer extends Player {
+		// Cooperates first, then checks opponent histories to determine which strategy
+		// to implement.
+		// If an opponent defected, it stops using ForgivingT4T and GrimTrigger, and
+		// switches to always defecting.
+		// If either opponent defects, it switches from Gradual Player to always
+		// defecting.
+		// If none of the above conditions are met, it cooperates.
 		int opponent1LastMove = -1;
 		int opponent2LastMove = -1;
 		boolean isOpponent1Defected = false;
@@ -343,7 +416,7 @@ public class ThreePrisonersDilemma {
 		boolean isForgiving = false;
 		boolean isGradual = false;
 
-		int selectAction(int n, int[] myHistory, int[] opponent1History, int[] opponent2History) {
+		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
 			if (n == 0) {
 				isGrimTrigger = true;
 				isForgiving = true;
@@ -351,16 +424,16 @@ public class ThreePrisonersDilemma {
 				return 0; // First move: Cooperate
 			} else {
 				// Check opponent 1 history
-				if (opponent1LastMove == 1 && opponent1History[n - 1] == 0) {
+				if (opponent1LastMove == 1 && oppHistory1[n - 1] == 0) {
 					isOpponent1Defected = true;
 				}
-				opponent1LastMove = opponent1History[n - 1];
+				opponent1LastMove = oppHistory1[n - 1];
 
 				// Check opponent 2 history
-				if (opponent2LastMove == 1 && opponent2History[n - 1] == 0) {
+				if (opponent2LastMove == 1 && oppHistory2[n - 1] == 0) {
 					isOpponent2Defected = true;
 				}
-				opponent2LastMove = opponent2History[n - 1];
+				opponent2LastMove = oppHistory2[n - 1];
 
 				// Implement Grim Trigger strategy
 				if (isGrimTrigger) {
@@ -372,7 +445,7 @@ public class ThreePrisonersDilemma {
 					}
 				}
 
-				// Implement Forgiving Tit for Tat strategy
+				// Implement Forgiving T4T strategy
 				if (isForgiving) {
 					if (isOpponent1Defected || isOpponent2Defected) {
 						isForgiving = false;
@@ -394,68 +467,6 @@ public class ThreePrisonersDilemma {
 
 				// If none of the above strategies are active, cooperate
 				return 0;
-			}
-		}
-	}
-
-	class GrimTriggerWithGradualPlayer extends Player {
-		private boolean defectMode = false;
-		private int roundsSinceLastDefect = -1;
-		private int threshold = 3;
-
-		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
-			if (n == 0) {
-				return 0; // Cooperate on first move
-			}
-
-			// Check if opponent defected last move
-			if (oppHistory1[oppHistory1.length - 1] == 1) {
-				defectMode = true;
-				roundsSinceLastDefect = 0;
-			}
-
-			// Play according to strategy
-			if (defectMode) {
-				if (roundsSinceLastDefect >= threshold) {
-					defectMode = false;
-				} else {
-					roundsSinceLastDefect++;
-				}
-				return 1; // Defect if in defect mode
-			} else {
-				return 0; // Cooperate if not in defect mode
-			}
-		}
-	}
-
-	class ForgivingT4TGradualPlayer extends Player {
-		int forgivenessthreshold = 2; // Threshold for forgiveness
-		int cooperateCount = 0; // Count of times opponent cooperated in a row
-		int lastAction = 0; // Last action played
-		int n = 0; // Round number
-
-		int selectAction(int n, int[] myHistory, int[] oppHistory1, int[] oppHistory2) {
-			this.n = n;
-			int oppLastAction = (oppHistory1.length == 0) ? 0 : oppHistory1[oppHistory1.length - 1];
-
-			// Forgiving Tit for Tat
-			if (oppHistory1.length < forgivenessthreshold
-					|| oppHistory1[oppHistory1.length - forgivenessthreshold] == 0) {
-				lastAction = 0;
-			} else {
-				lastAction = oppLastAction;
-			}
-
-			// Gradual Player
-			if (oppLastAction == 1) {
-				cooperateCount = 0;
-				return 1;
-			} else if (cooperateCount >= 2) {
-				cooperateCount = 0;
-				return 0;
-			} else {
-				cooperateCount++;
-				return 1;
 			}
 		}
 	}
@@ -529,13 +540,13 @@ public class ThreePrisonersDilemma {
 			case 11:
 				return new AlternateCooperateDefectPlayer();
 			case 12:
-				return new GrimTriggerWithForgivenessPlayer();
-			case 13:
-				return new GrimGradualWithForgiveness();
-			case 14:
 				return new GrimTriggerWithGradualPlayer();
+			case 13:
+				return new GrimTriggerWithForgivenessPlayer(); // chosen as Soh_QianYi_Player
+			case 14:
+				return new GradualWithForgivenessPlayer();
 			case 15:
-				return new ForgivingT4TGradualPlayer();
+				return new GrimTriggerGradualWithForgivenessPlayer();
 
 		}
 		throw new RuntimeException("Bad argument passed to makePlayer");

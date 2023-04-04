@@ -1,8 +1,8 @@
 # CZ4046 Intelligent Agents
 
-Python 3.9.12
+## **Assignment 1: Agent Decision Making**
 
-## Assignment 1: Agent Decision Making
+Python 3.9.12
 
 ### Folder Structure
 
@@ -25,3 +25,17 @@ Next, navigate to the assignment_1 folder
 #### Policy Iteration
 
 `python3 policy_iteration.py`
+
+## **Assignment 2: Repeated Prisoners Dilemma**
+
+Java 18.0.2.1
+
+### Running ThreePrisonersDilemma
+
+First, navigate to assignment_2 folder
+
+`cd assignment_2`
+
+Run `javac ThreePrisonersDilemma.java`
+
+Run `java ThreePrisonersDilemma`
